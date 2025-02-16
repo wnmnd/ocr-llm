@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+numpy
+opencv-python
+Pillow
+easyocr
+keras-ocr
+paddleocr
+pytesseract
