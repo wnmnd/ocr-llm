@@ -126,8 +126,12 @@ I have chosen **DistilBERT** as the foundational LLM for text classification due
 
 ### Data Preparation:
 - Gather a dataset of spam and non-spam text samples.
-- Preprocess the text (cleaning, tokenization, and padding).
-- Split data into training (80%) and validation (20%) sets.
+- Preprocess the text, including:
+  - **Cleaning** (removing unnecessary characters, normalizing text)
+  - **Tokenization** (converting text into tokens using DistilBERT's tokenizer)
+  - **Padding** (ensuring uniform input length)
+  - **Label Encoding** (mapping "ham" to 0 and "spam" to 1)
+  - **Stratified Splitting** (80% training, 20% validation)
 
 ### Fine-Tuning DistilBERT:
 1. Load the pre-trained DistilBERT model (`distilbert-base-uncased-finetuned-sst-2-english`).
