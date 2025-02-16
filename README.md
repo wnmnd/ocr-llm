@@ -113,6 +113,67 @@ Once the server is running, you can view the interactive API documentation at:
 - **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc UI:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
+## Docker Setup
+
+### Prerequisites
+Make sure you have Docker installed on your system. You can download it from [Docker Get Started](https://www.docker.com/get-started).
+
+### Building the Docker Image
+Open a terminal in the root directory of the project (where the Dockerfile is located) and run:
+```bash
+docker build -t ocr-api .
+```
+
+### This command will:
+- Build a Docker image named ocr-api.
+- Install all the required dependencies specified in the Dockerfile.
+- Copy the application files into the container.
+
+### Running the Docker Container
+Once the image is built, you can run the container using:
+```bash
+docker run -d -p 8000:8000 ocr-api
+```
+This command will:
+- Run the container in detached mode (-d).
+- Map port 8000 of the container to port 8000 on your host (-p 8000:8000).
+- Start the FastAPI server using Uvicorn.
+
+### Accessing the API
+After running the container, the API will be accessible at:
+
+[http://localhost:8000](http://localhost:8000)
+
+To access the interactive documentation (Swagger UI), go to:
+
+[http://localhost:8000/docs](http://localhost:8000/docs)
+
+### Stopping the Container
+To stop the running container, find its container ID using:
+```bash
+docker ps
+```
+Then stop the container using:
+```bash
+docker stop <container_id>
+```
+
+### Removing the Container and Image
+After stopping the container, you can remove it with:
+```bash
+docker rm <container_id>
+```
+To remove the image:
+bash
+docker rmi ocr-api
+
+
+### Tips
+If you make changes to your code and want to rebuild the Docker image, use:
+```bash
+docker build --no-cache -t ocr-api .
+```
+This forces Docker to rebuild the image without using cached layers.
 
 ---
 
