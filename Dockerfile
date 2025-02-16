@@ -1,18 +1,23 @@
-# Use official Python image as the base
-FROM python:3.9
+# Use an official Python runtime as a parent image
+FROM python:3.8
 
-# Set the working directory inside the container
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy requirements.txt and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Copy the rest of the application code
-COPY . .
+# Install system dependencies for Tesseract and OpenCV
+RUN apt-get update && \
+    apt-get install -y libgl1-mesa-glx tesseract-ocr && \
+    apt-get clean
 
-# Expose the port FastAPI will run on
+# Install any needed Python packages
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir fastapi uvicorn numpy opencv-python pillow easyocr keras-ocr paddlepaddle pytesseract
+
+# Expose the port the app runs on
 EXPOSE 8000
 
-# Command to start the FastAPI server
+# Run the application with Uvicorn
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
