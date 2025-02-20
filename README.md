@@ -18,7 +18,7 @@ Make sure you have Python installed (preferably Python 3.8 or later).
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/ocr-llm.git
+git clone https://github.com/wnmnd/ocr-llm.git
 cd ocr-llm-api
 ```
 
