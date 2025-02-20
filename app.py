@@ -4,7 +4,7 @@ import cv2
 import easyocr
 import keras_ocr
 from paddleocr import PaddleOCR
-import pytesseract  # Added Tesseract OCR
+import pytesseract 
 from PIL import Image
 import io
 import json
@@ -25,10 +25,20 @@ def save_results(data):
     with open(RESULTS_FILE, "w") as file:
         json.dump(data, file, indent=4)
 
-# OCR Functions with Confidence Scores
+# Image Resizing Function (Maintains Aspect Ratio)
+def image_resize(image, target_width=1024):
+    """ Resizes an image while maintaining aspect ratio. """
+    h, w = image.shape[:2]
+    scale_ratio = target_width / w
+    target_height = int(h * scale_ratio)
+    resized_image = cv2.resize(image, (target_width, target_height), interpolation=cv2.INTER_CUBIC)
+    return resized_image
+
+# Updated OCR functions to use resized images
 def ocr_with_paddle(img):
+    resized_img = image_resize(img)
     ocr = PaddleOCR(lang='en', use_angle_cls=True)
-    result = ocr.ocr(img)
+    result = ocr.ocr(resized_img)
     extracted_text = []
     confidences = []
     for line in result[0]:
@@ -38,15 +48,17 @@ def ocr_with_paddle(img):
     return extracted_text, confidences
 
 def ocr_with_keras(img):
+    resized_img = image_resize(img)
     pipeline = keras_ocr.pipeline.Pipeline()
-    images = [keras_ocr.tools.read(img)]
+    images = [keras_ocr.tools.read(resized_img)]
     predictions = pipeline.recognize(images)
     extracted_text = [text for text, confidence in predictions[0]]
     confidences = [confidence for text, confidence in predictions[0]]
     return extracted_text, confidences
 
 def ocr_with_easy(img):
-    gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    resized_img = image_resize(img)
+    gray_image = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
     reader = easyocr.Reader(['en'])
     results = reader.readtext(gray_image)
     extracted_text = [text for _, text, confidence in results]
@@ -54,7 +66,8 @@ def ocr_with_easy(img):
     return extracted_text, confidences
 
 def ocr_with_tesseract(img):
-    gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    resized_img = image_resize(img)
+    gray_image = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
     extracted_text = pytesseract.image_to_string(gray_image).split("\n")
     confidences = [1.0] * len(extracted_text)  # Tesseract doesn't return confidence scores
     return extracted_text, confidences
@@ -66,7 +79,7 @@ async def extract_text(ocr_method: str, file: UploadFile = File(...)):
         # Load image
         image = Image.open(io.BytesIO(await file.read()))
         img_cv = np.array(image)
-        
+
         # Select OCR method
         if ocr_method == "PaddleOCR":
             extracted_text, confidences = ocr_with_paddle(img_cv)
@@ -78,7 +91,7 @@ async def extract_text(ocr_method: str, file: UploadFile = File(...)):
             extracted_text, confidences = ocr_with_tesseract(img_cv)
         else:
             raise HTTPException(status_code=400, detail="Invalid OCR method! Choose PaddleOCR, EasyOCR, KerasOCR, or TesseractOCR.")
-        
+
         # Load previous results and append the new result
         results = load_results()
         new_result = {
@@ -89,7 +102,7 @@ async def extract_text(ocr_method: str, file: UploadFile = File(...)):
         }
         results.append(new_result)
         save_results(results)
-        
+
         return new_result
     
     except Exception as e:
